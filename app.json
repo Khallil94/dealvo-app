@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "DEALVO",
-    "slug": "dealvo-app",
+    "slug": "test",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -38,6 +38,7 @@
       "eas": {
         "projectId": "093efe7c-4e8a-46ed-9471-f80b31fc837e"
       }
-    }
+    },
+    "owner": "khallilbekk2026"
   }
 }
