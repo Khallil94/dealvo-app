@@ -840,21 +840,13 @@ const THEMES = {
     navBg:'#1A1A2E', statusBar:'light',
   },
 };
-
-// التبديل بين الوضعين - يمكن تغييره من Profile
-_darkMode = false;
-let _setDarkMode = (v) => { _darkMode = v; };
+// Dark Mode - managed inside App() via useState
+let _darkMode = false;
+let _setDarkMode = (v) => {};
 const getDarkMode = () => _darkMode;
 const setDarkMode = (val) => { _setDarkMode(val); };
-const T = _darkMode ? THEMES.dark : THEMES.light;
-const applyTheme = (dark) => {
-  _setDarkMode(dark);
-  // T يُحسب تلقائياً من _darkMode
-};
-
-// ============================================
-//  DATA
-// ============================================
+let T = THEMES.light;
+const applyTheme = (dark) => { _setDarkMode(dark); };
 const COUNTRIES = [
   { id:'uk',  flag:'🇬🇧', name:'United Kingdom',  domain:'amazon.co.uk',    currency:'£',   tag:'dv-uk21' },
   { id:'us',  flag:'🇺🇸', name:'United States',   domain:'amazon.com',      currency:'$',   tag:'dv-us21' },
@@ -1115,7 +1107,7 @@ const AuthService = {
       options: { data: { name: name.trim() } }
     });
     if (error) throw new Error(error.message);
-    if (!data.user) throw new Error('Registration failed');
+    if (!data.user && !data.session) { return { needsConfirmation: true }; }
 
     //
     await supabase.from('users').upsert({
@@ -3815,6 +3807,9 @@ export default function App() {
   const [products, setProducts]           = useState([]);
   const [productsLoading, setProdLoading] = useState(true);
   const [refreshing, setRefreshing]       = useState(false);
+  const colorScheme = require("react-native").useColorScheme();
+  _darkMode = colorScheme === "dark";
+  _setDarkMode = React.useState(_darkMode)[1];
   const [country, setCountry]             = useState(COUNTRIES[0]);
   const [favorites, setFavorites]         = useState([]);
   const [cart, setCart]                   = useState([]);
