@@ -1833,7 +1833,7 @@ const AnimatedCatChip = React.memo(function AnimatedCatChip({ c, idx, category, 
     Animated.timing(anim, { toValue:1, duration:400, delay: idx * 60, useNativeDriver:true }).start();
   }, []);
   return (
-    <Animated.View style={{
+    <Animated.View pointerEvents="none" style={{
       opacity: anim,
       transform:[{ translateY: anim.interpolate({ inputRange:[0,1], outputRange:[14,0] }) }],
     }}>
@@ -1859,7 +1859,7 @@ const AnimatedTrendCard = React.memo(function AnimatedTrendCard({ p, idx, countr
     ]).start();
   }, []);
   return (
-    <Animated.View style={{ opacity: fadeAnim, transform:[{ translateX: slideAnim }] }}>
+    <Animated.View pointerEvents="none" style={{ opacity: fadeAnim, transform:[{ translateX: slideAnim }] }}>
       <TouchableOpacity style={s.trendCard} onPress={()=>setDetail(p)}>
         <Image source={{ uri: optimizeImage(p.image) }} style={s.trendImg} />
         <Text style={s.trendTitle} numberOfLines={2}>{p.title}</Text>
@@ -1882,7 +1882,7 @@ const AnimatedProductCard = React.memo(function AnimatedProductCard({ item, idx,
     ]).start();
   }, []);
   return (
-    <Animated.View style={{ opacity: anim, transform:[{ translateY: slide }] }}>
+    <Animated.View pointerEvents="none" style={{ opacity: anim, transform:[{ translateY: slide }] }}>
       <ProductCard item={item} cart={cart} favorites={favorites}
         country={country} onPress={onPress} onFav={onFav} onCart={onCart} />
     </Animated.View>
@@ -1896,9 +1896,9 @@ const AnimatedHeroBanner = React.memo(function AnimatedHeroBanner({ plat }) {
     Animated.spring(slideAnim, { toValue:0, friction:7, tension:50, useNativeDriver:true }).start();
   }, [plat.id]);
   return (
-    <Animated.View style={{ transform:[{ translateX: slideAnim }] }}>
+    <Animated.View pointerEvents="none" style={{ transform:[{ translateX: slideAnim }] }}>
       <View style={[s.hero, { backgroundColor:plat.color }]}>
-        <View style={{ flex:1 }}>
+        <View style={{ flex:1, width:W }}>
           <View style={s.heroBadge}><Text style={{ color:'#fff', fontSize:10, fontWeight:'800' }}>⚡ LIMITED OFFER</Text></View>
           <Text style={s.heroTitle}>Up to 70% OFF on {plat.name}</Text>
         </View>
@@ -2199,7 +2199,7 @@ const RewardsTab = React.memo(function RewardsTab(props) {
           {coupons.map(c => (
             <View key={c.id} style={[s.cartRow, { backgroundColor:T.green+'10', borderColor:T.green+'30' }]}>
               <Text style={{ fontSize:24 }}>🎟️</Text>
-              <View style={{ flex:1 }}>
+              <View style={{ flex:1, width:W }}>
                 <Text style={{ fontWeight:'800', color:T.green }}>Coupon Earned</Text>
                 <Text style={{ color:T.textMuted, fontSize:11 }}>{c.earned_reason}</Text>
               </View>
@@ -2266,7 +2266,7 @@ function ContactScreen({ user, onBack, showToast }) {
       <View style={[s.detailBar, { justifyContent:'center' }]}>
         <Text style={{ fontSize:18, fontWeight:'800', color:T.text }}>Contact Us</Text>
       </View>
-      <KeyboardAvoidingView behavior={Platform.OS==='ios'?'padding':'height'} style={{ flex:1 }}>
+      <KeyboardAvoidingView behavior={Platform.OS==='ios'?'padding':'height'} style={{ flex:1, width:W }}>
         <ScrollView contentContainerStyle={{ padding:20 }} keyboardShouldPersistTaps="handled">
           {!sent ? (
             <>
@@ -2363,7 +2363,7 @@ function SplashScreen({ onDone }) {
         opacity: glow.interpolate({ inputRange:[0,1], outputRange:[0, 0.08] }),
         transform:[{ scale: glow.interpolate({ inputRange:[0,1], outputRange:[0.5, 1.5] }) }],
       }} />
-      <Animated.View style={{ opacity:fade, transform:[{scale}], alignItems:'center' }}>
+      <Animated.View pointerEvents="none" style={{ opacity:fade, transform:[{scale}], alignItems:'center' }}>
         <View style={{
           width:110, height:110, borderRadius:32,
           backgroundColor:'#FF6B35', alignItems:'center', justifyContent:'center',
@@ -2380,7 +2380,7 @@ function SplashScreen({ onDone }) {
           BEST DEALS · EVERY DAY
         </Animated.Text>
         <View style={{ width:120, height:2, backgroundColor:'rgba(255,255,255,0.08)', borderRadius:2, marginTop:48, overflow:'hidden' }}>
-          <Animated.View style={{
+          <Animated.View pointerEvents="none" style={{
             height:2, backgroundColor:'#FF6B35', borderRadius:2,
             width: barW.interpolate({ inputRange:[0,1], outputRange:['0%','100%'] }),
           }} />
@@ -2496,7 +2496,7 @@ function OnboardingScreen({ onComplete }) {
       <ScrollView ref={scrollRef} horizontal pagingEnabled
         scrollEnabled={true}
         showsHorizontalScrollIndicator={false}
-        style={{ flex:1 }}
+        style={{ flex:1, width:W }}
         onMomentumScrollEnd={(e) => {
           const newPage = Math.round(e.nativeEvent.contentOffset.x / W);
           if (newPage !== page) goTo(newPage);
@@ -2508,7 +2508,7 @@ function OnboardingScreen({ onComplete }) {
       </ScrollView>
 
       {/* Animated content */}
-      <Animated.View style={{
+      <Animated.View pointerEvents="none" style={{
         position:'absolute', top:0, left:0, right:0, bottom:0,
         opacity:fadeAnim, transform:[{scale:scaleAnim}],
         alignItems:'center', justifyContent:'center', paddingHorizontal:32,
@@ -2554,7 +2554,7 @@ function OnboardingScreen({ onComplete }) {
                 <View style={{ width:40, height:40, borderRadius:12, backgroundColor:item.color+'30', alignItems:'center', justifyContent:'center' }}>
                   <Text style={{ fontSize:18 }}>{i === 0 ? '🔥' : '⚡'}</Text>
                 </View>
-                <View style={{ flex:1 }}>
+                <View style={{ flex:1, width:W }}>
                   <Text style={{ color:'#fff', fontWeight:'700', fontSize:13 }}>{item.platform}</Text>
                   <Text style={{ color:'rgba(255,255,255,0.5)', fontSize:11 }}>{item.item}</Text>
                   <View style={{ flexDirection:'row', alignItems:'center', gap:8, marginTop:4 }}>
@@ -2704,7 +2704,7 @@ function AuthScreen({ onLogin }) {
   if (mode === 'forgot') return (
     <SafeAreaView style={{ flex:1, backgroundColor:T.bg }}>
       <StatusBar style="dark" />
-      <KeyboardAvoidingView behavior={Platform.OS==='ios'?'padding':'height'} style={{ flex:1 }}>
+      <KeyboardAvoidingView behavior={Platform.OS==='ios'?'padding':'height'} style={{ flex:1, width:W }}>
         <ScrollView contentContainerStyle={s.authScroll} keyboardShouldPersistTaps="handled">
           <Text style={s.authTitle}>Reset Password 🔑</Text>
           <Text style={s.authSub}>Enter your email and we will send a reset link via Supabase</Text>
@@ -2739,7 +2739,7 @@ function AuthScreen({ onLogin }) {
   return (
     <SafeAreaView style={{ flex:1, backgroundColor:T.bg }}>
       <StatusBar style="dark" />
-      <KeyboardAvoidingView behavior={Platform.OS==='ios'?'padding':'height'} style={{ flex:1 }}>
+      <KeyboardAvoidingView behavior={Platform.OS==='ios'?'padding':'height'} style={{ flex:1, width:W }}>
         <ScrollView contentContainerStyle={s.authScroll} keyboardShouldPersistTaps="handled">
 
           {/* Logo */}
@@ -3116,7 +3116,7 @@ function ShareModal({ visible, product, country, onClose }) {
         <TouchableOpacity activeOpacity={1} style={s.sheet}>
           <View style={{ flexDirection:'row', gap:12, marginBottom:18, backgroundColor:T.inputBg, padding:12, borderRadius:14 }}>
             <Image source={{ uri: optimizeImage(product.image) }} style={{ width:52, height:52, borderRadius:10 }} />
-            <View style={{ flex:1 }}>
+            <View style={{ flex:1, width:W }}>
               <Text style={{ fontWeight:'800', fontSize:13, color:T.text }} numberOfLines={2}>{product.title}</Text>
               <Text style={{ color:T.primary, fontWeight:'900', fontSize:15, marginTop:2 }}>
                 {curr}{product.price.toFixed(2)}
@@ -3406,7 +3406,7 @@ const CartTab = React.memo(function CartTab(props) {
             return (
               <View style={[s.cartRow, isRTL && { flexDirection:'row-reverse' }]}>
                 <Image source={{ uri: optimizeImage(item.image) }} style={s.cartImg} />
-                <View style={{ flex:1 }}>
+                <View style={{ flex:1, width:W }}>
                   <Text style={{ color:T.text, fontWeight:'700', fontSize:13, textAlign: isRTL ? 'right' : 'left' }} numberOfLines={2}>{item.title}</Text>
                   <Text style={{ color:T.primary, fontWeight:'900', fontSize:15, marginTop:4 }}>{curr}{item.price.toFixed(2)}</Text>
                   <Text style={{ color:T.textMuted, fontSize:11 }}>{(PLATFORMS[item.platform] || PLATFORMS['amazon']).name}</Text>
@@ -3480,7 +3480,7 @@ const ProfileTab = React.memo((props) => {
       {/* Country */}
       <View style={[s.profileCard, { flexDirection: isRTL ? 'row-reverse' : 'row', alignItems:'center', padding:16, marginTop:4 }]}>
         <Text style={{ fontSize:26, marginRight: isRTL ? 0 : 12, marginLeft: isRTL ? 12 : 0 }}>{country.flag}</Text>
-        <View style={{ flex:1 }}>
+        <View style={{ flex:1, width:W }}>
           <Text style={{ fontWeight:'700', color:T.text, textAlign: isRTL ? 'right' : 'left' }}>{country.name}</Text>
           <Text style={{ color:T.textMuted, fontSize:12 }}>
             {t ? t('shoppingRegion') : 'Shopping region'} - {country.currency}
@@ -3491,7 +3491,7 @@ const ProfileTab = React.memo((props) => {
       {/* Language Toggle */}
       <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', alignItems:'center', backgroundColor:T.inputBg, borderRadius:16, padding:16, marginTop:8 }}>
         <Text style={{ fontSize:22, marginRight: isRTL ? 0 : 12, marginLeft: isRTL ? 12 : 0 }}>🌐</Text>
-        <View style={{ flex:1 }}>
+        <View style={{ flex:1, width:W }}>
           <Text style={{ fontWeight:'700', color:T.text, textAlign: isRTL ? 'right' : 'left' }}>
             {t ? t('language') : 'Language'}
           </Text>
@@ -3512,7 +3512,7 @@ const ProfileTab = React.memo((props) => {
       {/* Dark Mode Toggle */}
       <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', alignItems:'center', backgroundColor:T.inputBg, borderRadius:16, padding:16, marginTop:8 }}>
         <Text style={{ fontSize:22, marginRight: isRTL ? 0 : 12, marginLeft: isRTL ? 12 : 0 }}>{darkMode ? '🌙' : '☀️'}</Text>
-        <View style={{ flex:1 }}>
+        <View style={{ flex:1, width:W }}>
           <Text style={{ fontWeight:'700', color:T.text, textAlign: isRTL ? 'right' : 'left' }}>
             {t ? t('darkMode') : 'Dark Mode'}
           </Text>
@@ -3747,7 +3747,7 @@ const AdminDashboard = React.memo(function AdminDashboard(props) {
           <View key={item.id} style={[s.cartRow, { marginBottom:8 }]}>
             <Text style={{ fontSize:16, fontWeight:'900', color:T.textMuted, width:22 }}>{i+1}</Text>
             <Image source={{ uri: optimizeImage(item.image) }} style={{ width:44, height:44, borderRadius:10 }} />
-            <View style={{ flex:1 }}>
+            <View style={{ flex:1, width:W }}>
               <Text style={{ color:T.text, fontWeight:'700', fontSize:12 }} numberOfLines={1}>{item.title}</Text>
               <Text style={{ color:T.textMuted, fontSize:11 }}>{(PLATFORMS[item.platform] || PLATFORMS['amazon']).name} - {item.category}</Text>
             </View>
@@ -3764,7 +3764,7 @@ const AdminDashboard = React.memo(function AdminDashboard(props) {
         <View key={item.id} style={[s.cartRow, { marginBottom:8 }]}>
           <Text style={{ fontSize:16, fontWeight:'900', color:T.textMuted, width:22 }}>{i+1}</Text>
           <Image source={{ uri: optimizeImage(item.image) }} style={{ width:44, height:44, borderRadius:10 }} />
-          <View style={{ flex:1 }}>
+          <View style={{ flex:1, width:W }}>
             <Text style={{ color:T.text, fontWeight:'700', fontSize:12 }} numberOfLines={1}>{item.title}</Text>
             <Text style={{ color:T.textMuted, fontSize:11 }}>{item.category}</Text>
           </View>
@@ -3925,7 +3925,7 @@ export default function App() {
   const handleLogin = useCallback(async (userData) => {
     setUser(userData);
     await AsyncStorage.setItem(STORAGE.USER, JSON.stringify(userData));
-    await loadUserData(userData.id);
+    try { await loadUserData(userData.id); } catch(e) { console.log('loadUserData error:', e); }
     setAppState('main');
     // Daily login points
     if (!userData.isGuest) {
