@@ -842,7 +842,8 @@ const THEMES = {
 };
 
 // التبديل بين الوضعين - يمكن تغييره من Profile
-let [_darkMode, _setDarkMode] = React.useState(false);
+_darkMode = false;
+let _setDarkMode = (v) => { _darkMode = v; };
 const getDarkMode = () => _darkMode;
 const setDarkMode = (val) => { _setDarkMode(val); };
 const T = _darkMode ? THEMES.dark : THEMES.light;
