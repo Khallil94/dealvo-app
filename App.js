@@ -4,6 +4,27 @@
  * Version: 2.0
  */
 
+
+// === SIMPLE CACHE ===
+const _cache = {};
+const cachedFetch = async (url, options, ttl = 30000) => {
+  const key = url + JSON.stringify(options || {});
+  const now = Date.now();
+  if (_cache[key] && now - _cache[key].t < ttl) return _cache[key].data;
+  const res = await fetch(url, options);
+  const data = await res.json();
+  _cache[key] = { data, t: now };
+  return data;
+};
+// === END CACHE ===
+
+// === IMAGE OPTIMIZER ===
+const optimizeImage = (url) => {
+  if (!url) return url;
+  return url.replace('_AC_UY654_QL65_', '_AC_UY300_QL60_');
+};
+// === END IMAGE OPTIMIZER ===
+
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, TextInput, Image,
@@ -710,7 +731,7 @@ const NotificationService = {
   async setPriceAlert(userId, productId, productTitle, currentPrice, productData = {}) {
     if (!userId || userId === 'guest') return false;
     try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/price_alerts`, {
+      const res = await cachedFetch(`${SUPABASE_URL}/rest/v1/price_alerts`, {
         method: 'POST',
         headers: {
           'apikey': SUPABASE_KEY,
@@ -821,13 +842,13 @@ const THEMES = {
 };
 
 // التبديل بين الوضعين - يمكن تغييره من Profile
-let _darkMode = false;
+let [_darkMode, _setDarkMode] = React.useState(false);
 const getDarkMode = () => _darkMode;
-const setDarkMode = (val) => { _darkMode = val; };
-let T = THEMES.light;
+const setDarkMode = (val) => { _setDarkMode(val); };
+let [T, setT] = React.useState(THEMES.light);
 const applyTheme = (dark) => {
-  _darkMode = dark;
-  T = dark ? THEMES.dark : THEMES.light;
+  _setDarkMode(dark);
+  setT(dark ? THEMES.dark : THEMES.light);
 };
 
 // ============================================
@@ -1463,7 +1484,7 @@ const SocialDealsService = {
 
   async submitDeal(userId, deal) {
     try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/social_deals`, {
+      const res = await cachedFetch(`${SUPABASE_URL}/rest/v1/social_deals`, {
         method: 'POST',
         headers: {
           'apikey': SUPABASE_KEY,
@@ -1647,7 +1668,7 @@ const ProductCard = React.memo((props) => {
   return (
     <TouchableOpacity style={s.card} onPress={() => onPress(item)} activeOpacity={0.93}>
       <View style={s.cardImg}>
-        <Image source={{ uri:item.image }} style={{ width:'100%', height:'100%' }} resizeMode="cover" />
+        <Image source={{ uri: optimizeImage(item.image) }} style={{ width:'100%', height:'100%' }} resizeMode="cover" />
         <View style={s.discTag}><Text style={s.discTagTxt}>-{calcDiscount(item)}%</Text></View>
         <TouchableOpacity style={s.favBtn} onPress={() => onFav(item.id)} hitSlop={{top:8,bottom:8,left:8,right:8}}>
           <Text style={{ fontSize:17 }}>{isFav ? '❤️' : '🤍'}</Text>
@@ -1847,7 +1868,7 @@ const AnimatedTrendCard = React.memo(function AnimatedTrendCard({ p, idx, countr
   return (
     <Animated.View style={{ opacity: fadeAnim, transform:[{ translateX: slideAnim }] }}>
       <TouchableOpacity style={s.trendCard} onPress={()=>setDetail(p)}>
-        <Image source={{ uri:p.image }} style={s.trendImg} />
+        <Image source={{ uri: optimizeImage(p.image) }} style={s.trendImg} />
         <Text style={s.trendTitle} numberOfLines={2}>{p.title}</Text>
         <Text style={s.trendPrice}>
           {p.platform==='aliexpress'?'$':country.currency}{p.price.toFixed(2)}
@@ -2040,7 +2061,7 @@ const SocialTab = React.memo(function SocialTab(props) {
                       <Text style={{ color:T.textMuted, fontSize:12 }}>{item.dislikes_count}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => Linking.openURL(item.url)}>
-                      <Text style={{ color:T.primary, fontWeight:'700', fontSize:12 }}>View ></Text>
+                      <Text style={{ color:T.primary, fontWeight:'700', fontSize:12 }}></Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -2343,7 +2364,7 @@ function SplashScreen({ onDone }) {
   return (
     <View style={{ flex:1, backgroundColor:'#0A0A12', alignItems:'center', justifyContent:'center' }}>
       <StatusBar style="light" />
-      <Animated.View style={{
+      <Animated.View pointerEvents="box-none" style={{
         position:'absolute', width:300, height:300, borderRadius:150,
         backgroundColor:'#FF6B35',
         opacity: glow.interpolate({ inputRange:[0,1], outputRange:[0, 0.08] }),
@@ -2609,7 +2630,6 @@ function OnboardingScreen({ onComplete }) {
         )}
       </View>
       </View>
-    </View>
   );
 }
 
@@ -2974,7 +2994,7 @@ function DetailScreen({ product, favorites, cart, country, onBack, onFav, onCart
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Image */}
         <View style={s.detailImgBox}>
-          <Image source={{ uri:product.image }} style={{ width:'100%', height:'100%' }} resizeMode="contain" />
+          <Image source={{ uri: optimizeImage(product.image) }} style={{ width:'100%', height:'100%' }} resizeMode="contain" />
           <View style={[s.platTag, { backgroundColor:plat.color }]}>
             <Text style={{ color:'#fff', fontSize:11, fontWeight:'800' }}>{plat.icon} {plat.name}</Text>
           </View>
@@ -3102,7 +3122,7 @@ function ShareModal({ visible, product, country, onClose }) {
       <TouchableOpacity style={s.overlay} activeOpacity={1} onPress={onClose}>
         <TouchableOpacity activeOpacity={1} style={s.sheet}>
           <View style={{ flexDirection:'row', gap:12, marginBottom:18, backgroundColor:T.inputBg, padding:12, borderRadius:14 }}>
-            <Image source={{ uri:product.image }} style={{ width:52, height:52, borderRadius:10 }} />
+            <Image source={{ uri: optimizeImage(product.image) }} style={{ width:52, height:52, borderRadius:10 }} />
             <View style={{ flex:1 }}>
               <Text style={{ fontWeight:'800', fontSize:13, color:T.text }} numberOfLines={2}>{product.title}</Text>
               <Text style={{ color:T.primary, fontWeight:'900', fontSize:15, marginTop:2 }}>
@@ -3146,6 +3166,7 @@ function CountryModal({ visible, current, onSelect, onClose }) {
       <TouchableOpacity style={s.overlay} activeOpacity={1} onPress={onClose}>
         <TouchableOpacity activeOpacity={1} style={s.sheet}>
           <Text style={[s.sheetTitle, { marginBottom:16 }]}>🌍 Select Country</Text>
+          <ScrollView style={{ maxHeight: 420 }} showsVerticalScrollIndicator={false}>
           {COUNTRIES.map(c => (
             <TouchableOpacity key={c.id}
               style={current.id===c.id
@@ -3162,6 +3183,7 @@ function CountryModal({ visible, current, onSelect, onClose }) {
               {current.id===c.id && <Text style={{ color:T.primary, fontSize:20 }}>v</Text>}
             </TouchableOpacity>
           ))}
+          </ScrollView>
         </TouchableOpacity>
       </TouchableOpacity>
     </Modal>
@@ -3313,36 +3335,7 @@ const HomeTab = React.memo((props) => {
           <Text style={{ color:T.textMuted, fontSize:12 }}>{filtered.length} deals</Text>
           </View>
 
-          {/* Bundle Deals */}
-          {bundles && bundles.length > 0 && (
-            <View style={{ marginHorizontal:16, marginBottom:16 }}>
-              <Text style={s.secLabel}>Bundle Deals - Save More</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap:12 }}>
-                {bundles.map(function(bundle) {
-                  return (
-                    <View key={bundle.id} style={{ width:190, backgroundColor:T.primary+'10', borderRadius:16, padding:12, borderWidth:1, borderColor:T.primary+'25' }}>
-                      <View style={{ flexDirection:'row', gap:6, marginBottom:8 }}>
-                        <Image source={{ uri:bundle.image1 }} style={{ width:55, height:55, borderRadius:10 }} />
-                        <View style={{ alignSelf:'center' }}><Text style={{ fontSize:16, color:T.primary, fontWeight:'900' }}>+</Text></View>
-                        <Image source={{ uri:bundle.image2 }} style={{ width:55, height:55, borderRadius:10 }} />
-                      </View>
-                      <Text style={{ color:T.text, fontWeight:'700', fontSize:11 }} numberOfLines={2}>{bundle.title}</Text>
-                      <View style={{ flexDirection:'row', justifyContent:'space-between', alignItems:'center', marginTop:6 }}>
-                        <Text style={{ color:T.primary, fontWeight:'900', fontSize:14 }}>${bundle.bundlePrice.toFixed(2)}</Text>
-                        <View style={{ backgroundColor:T.green+'25', paddingHorizontal:6, paddingVertical:2, borderRadius:8 }}>
-                          <Text style={{ color:T.green, fontSize:10, fontWeight:'800' }}>Save ${bundle.saving.toFixed(2)}</Text>
-                        </View>
-                      </View>
-                    </View>
-                  );
-                })}
-              </ScrollView>
-            </View>
-          )}
-          <View>
-        </View>
-
-        {/* Products Grid */}
+          {/* Products Grid */}
         {filtered.length===0 ? (
           <View style={s.empty}>
             <Text style={{ fontSize:48 }}>🔍</Text>
@@ -3419,7 +3412,7 @@ const CartTab = React.memo(function CartTab(props) {
             const curr = item.platform==='aliexpress' ? '$' : country.currency;
             return (
               <View style={[s.cartRow, isRTL && { flexDirection:'row-reverse' }]}>
-                <Image source={{ uri:item.image }} style={s.cartImg} />
+                <Image source={{ uri: optimizeImage(item.image) }} style={s.cartImg} />
                 <View style={{ flex:1 }}>
                   <Text style={{ color:T.text, fontWeight:'700', fontSize:13, textAlign: isRTL ? 'right' : 'left' }} numberOfLines={2}>{item.title}</Text>
                   <Text style={{ color:T.primary, fontWeight:'900', fontSize:15, marginTop:4 }}>{curr}{item.price.toFixed(2)}</Text>
@@ -3617,7 +3610,7 @@ const PriceUpdateWidget = React.memo(function PriceUpdateWidget(props) {
   return (
     <View style={[s.profileCard, { alignItems:'flex-start', marginBottom:8 }]}>
       <Text style={{ color:T.textMuted, fontSize:12, marginBottom:10 }}>
-        عند تغيير السعر > Supabase Trigger يرسل إشعارات تلقائياً للمستخدمين
+        عند تغيير السعر >{" Supabase Trigger"} يرسل إشعارات تلقائياً للمستخدمين
       </Text>
 
       {/* اختيار المنتج */}
@@ -3760,7 +3753,7 @@ const AdminDashboard = React.memo(function AdminDashboard(props) {
         topClicked.map((item, i) => (
           <View key={item.id} style={[s.cartRow, { marginBottom:8 }]}>
             <Text style={{ fontSize:16, fontWeight:'900', color:T.textMuted, width:22 }}>{i+1}</Text>
-            <Image source={{ uri:item.image }} style={{ width:44, height:44, borderRadius:10 }} />
+            <Image source={{ uri: optimizeImage(item.image) }} style={{ width:44, height:44, borderRadius:10 }} />
             <View style={{ flex:1 }}>
               <Text style={{ color:T.text, fontWeight:'700', fontSize:12 }} numberOfLines={1}>{item.title}</Text>
               <Text style={{ color:T.textMuted, fontSize:11 }}>{(PLATFORMS[item.platform] || PLATFORMS['amazon']).name} - {item.category}</Text>
@@ -3777,7 +3770,7 @@ const AdminDashboard = React.memo(function AdminDashboard(props) {
       {topProducts.slice(0,5).map((item, i) => (
         <View key={item.id} style={[s.cartRow, { marginBottom:8 }]}>
           <Text style={{ fontSize:16, fontWeight:'900', color:T.textMuted, width:22 }}>{i+1}</Text>
-          <Image source={{ uri:item.image }} style={{ width:44, height:44, borderRadius:10 }} />
+          <Image source={{ uri: optimizeImage(item.image) }} style={{ width:44, height:44, borderRadius:10 }} />
           <View style={{ flex:1 }}>
             <Text style={{ color:T.text, fontWeight:'700', fontSize:12 }} numberOfLines={1}>{item.title}</Text>
             <Text style={{ color:T.textMuted, fontSize:11 }}>{item.category}</Text>
@@ -4128,7 +4121,7 @@ export default function App() {
     <SafeAreaView style={{ flex:1, backgroundColor:T.bg }}>
       <StatusBar style="dark" />
 
-      {tab === 'home' && (
+        <View style={{display: tab === 'home' ? 'flex' : 'none', flex: 1}}>
         <HomeTab
           user={user} country={country} products={products}
           refreshing={refreshing} onRefresh={onRefresh}
@@ -4141,30 +4134,30 @@ export default function App() {
           openShare={openShare} setShowCountry={setShowCountry}
           t={t} isRTL={isRTL} lang={lang} setLang={setLang}
         />
-      )}
-      {tab === 'wishlist' && (
+        </View>
+        <View style={{display: tab === 'wishlist' ? 'flex' : 'none', flex: 1}}>
         <WishlistTab products={products} favorites={favorites} cart={cart}
           country={country} setDetail={setDetail} toggleFav={toggleFav} addToCart={addToCart}
           t={t} isRTL={isRTL} />
-      )}
-      {tab === 'cart' && (
+        </View>
+        <View style={{display: tab === 'cart' ? 'flex' : 'none', flex: 1}}>
         <CartTab products={products} cart={cart} setCart={setCart} country={country}
           t={t} isRTL={isRTL} />
-      )}
-      {tab === 'social' && (
+        </View>
+        <View style={{display: tab === 'social' ? 'flex' : 'none', flex: 1}}>
         <SocialTab user={user} country={country} showToast={showToast} t={t} isRTL={isRTL} />
-      )}
-      {tab === 'rewards' && (
+        </View>
+        <View style={{display: tab === 'rewards' ? 'flex' : 'none', flex: 1}}>
         <RewardsTab user={user} showToast={showToast} t={t} isRTL={isRTL} />
-      )}
-      {tab === 'profile' && (
+        </View>
+        <View style={{display: tab === 'profile' ? 'flex' : 'none', flex: 1}}>
         <ProfileTab
           user={user} favorites={favorites} cart={cart}
           onSignOut={handleSignOut} country={country}
           onContact={() => setShowContact(true)}
           t={t} isRTL={isRTL} lang={lang} setLang={setLang}
         />
-      )}
+        </View>
 
       {/* Contact Screen */}
       {showContact && (
