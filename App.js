@@ -845,10 +845,10 @@ const THEMES = {
 let [_darkMode, _setDarkMode] = React.useState(false);
 const getDarkMode = () => _darkMode;
 const setDarkMode = (val) => { _setDarkMode(val); };
-let [T, setT] = React.useState(THEMES.light);
+const T = _darkMode ? THEMES.dark : THEMES.light;
 const applyTheme = (dark) => {
   _setDarkMode(dark);
-  setT(dark ? THEMES.dark : THEMES.light);
+  // T يُحسب تلقائياً من _darkMode
 };
 
 // ============================================
